@@ -1,0 +1,447 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Document Verification System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+        }
+        .upload-area {
+            border: 2px dashed #cbd5e1; /* Tailwind gray-300 */
+            padding: 2rem;
+            text-align: center;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+            transition: background-color 0.3s ease;
+        }
+        .upload-area:hover {
+            background-color: #f9fafb; /* Tailwind gray-50 */
+        }
+        .file-input-label {
+            cursor: pointer;
+            padding: 0.75rem 1.5rem;
+            background-color: #3b82f6; /* Tailwind blue-500 */
+            color: white;
+            border-radius: 0.375rem;
+            transition: background-color 0.3s ease;
+        }
+        .file-input-label:hover {
+            background-color: #2563eb; /* Tailwind blue-600 */
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #3b82f6; /* Tailwind blue-500 */
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px; /* pill shape */
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        .status-verified { background-color: #d1fae5; color: #065f46; /* Tailwind green-100, green-700 */ }
+        .status-warning { background-color: #fef3c7; color: #92400e; /* Tailwind yellow-100, yellow-700 */ }
+        .status-rejected { background-color: #fee2e2; color: #991b1b; /* Tailwind red-100, red-700 */ }
+        .status-processing { background-color: #e0e7ff; color: #3730a3; /* Tailwind indigo-100, indigo-700 */}
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr; /* Stack columns on smaller screens */
+            }
+            .container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container bg-white shadow-xl rounded-lg p-6 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">AI Document Verification System</h1>
+            <p class="text-gray-600 mt-2">Upload IDs, certificates, invoices, or forms for AI-powered verification.</p>
+        </header>
+
+        <section id="uploadSection" class="mb-8">
+            <div class="upload-area">
+                <input type="file" id="documentUpload" class="hidden" accept="image/jpeg,image/png,image/webp"> <label for="documentUpload" class="file-input-label inline-block mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Choose Image Document
+                </label>
+                <p id="fileName" class="text-gray-500 text-sm">No file selected (JPEG, PNG, WEBP)</p>
+            </div>
+            <button id="verifyButton" class="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out disabled:opacity-50" disabled>
+                Verify Document
+            </button>
+        </section>
+
+        <section id="processingSection" class="hidden text-center py-10">
+            <div class="spinner mx-auto mb-4"></div>
+            <p id="processingStatusText" class="text-xl font-semibold text-gray-700">Analyzing Document...</p>
+            <p class="text-gray-500">This may take a moment. AI is at work!</p>
+        </section>
+
+        <section id="resultsSection" class="hidden">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Verification Results</h2>
+            <div class="results-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-50 p-4 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Document Preview</h3>
+                    <div id="documentPreview" class="w-full h-64 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
+                        <img id="previewImage" src="#" alt="Document Preview" class="hidden max-w-full max-h-full object-contain">
+                        <p id="previewPlaceholder" class="text-gray-500">Preview not available</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-700">Details</h3>
+                        <span id="overallStatus" class="status-badge"></span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3"><strong>Document Type:</strong> <span id="docType">N/A</span></p>
+
+                    <div class="mb-4">
+                        <h4 class="font-medium text-gray-700 mb-2">Extracted Information (AI Generated):</h4>
+                        <ul id="extractedData" class="list-disc list-inside text-sm text-gray-600 space-y-1 pl-2">
+                            </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h4 class="font-medium text-gray-700 mb-2">Authenticity Analysis (AI Generated):</h4>
+                        <ul id="authenticityChecks" class="list-disc list-inside text-sm text-gray-600 space-y-1 pl-2">
+                            </ul>
+                    </div>
+
+                    <div id="inconsistencyReportContainer" class="hidden">
+                        <h4 class="font-medium text-red-600 mb-2">Potential Inconsistencies (AI Generated):</h4>
+                        <ul id="inconsistencyReport" class="list-disc list-inside text-sm text-red-500 space-y-1 pl-2">
+                            </ul>
+                    </div>
+                </div>
+            </div>
+            <button id="verifyAnotherButton" class="mt-8 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out">
+                Verify Another Document
+            </button>
+        </section>
+
+        <div id="messageBox" class="hidden fixed bottom-5 right-5 bg-red-500 text-white p-4 rounded-lg shadow-lg transition-opacity duration-300 z-50">
+            <p id="messageText"></p>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const uploadSection = document.getElementById('uploadSection');
+        const processingSection = document.getElementById('processingSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const documentUpload = document.getElementById('documentUpload');
+        const fileNameDisplay = document.getElementById('fileName');
+        const verifyButton = document.getElementById('verifyButton');
+        const documentPreview = document.getElementById('documentPreview');
+        const previewImage = document.getElementById('previewImage');
+        const previewPlaceholder = document.getElementById('previewPlaceholder');
+        const overallStatus = document.getElementById('overallStatus');
+        const docType = document.getElementById('docType');
+        const extractedDataList = document.getElementById('extractedData');
+        const authenticityChecksList = document.getElementById('authenticityChecks');
+        const inconsistencyReportContainer = document.getElementById('inconsistencyReportContainer');
+        const inconsistencyReportList = document.getElementById('inconsistencyReport');
+        const verifyAnotherButton = document.getElementById('verifyAnotherButton');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const processingStatusText = document.getElementById('processingStatusText');
+
+        let currentFile = null;
+        let imageBase64 = null;
+
+        // IMPORTANT: REPLACE WITH YOUR ACTUAL API KEY OR LEAVE EMPTY IF PROVIDED BY CANVAS ENVIRONMENT
+        const GEMINI_API_KEY = "AIzaSyBj-fPGKztBctUTPEpOc8bHEH2hbCTxosM"; // If Canvas provides it, this can be left empty.
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+        // Event Listeners
+        documentUpload.addEventListener('change', handleFileSelect);
+        verifyButton.addEventListener('click', processDocumentWithAI);
+        verifyAnotherButton.addEventListener('click', resetSystem);
+
+        // Functions
+        function handleFileSelect(event) {
+            currentFile = event.target.files[0];
+            imageBase64 = null; // Reset image data
+            if (currentFile) {
+                if (!['image/jpeg', 'image/png', 'image/webp'].includes(currentFile.type)) {
+                    showMessage("Invalid file type. Please upload a JPEG, PNG, or WEBP image.", "error");
+                    resetFileSelection();
+                    return;
+                }
+
+                fileNameDisplay.textContent = currentFile.name;
+                verifyButton.disabled = false;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewImage.classList.remove('hidden');
+                    previewPlaceholder.classList.add('hidden');
+                    // Store base64 data, removing the prefix
+                    imageBase64 = e.target.result.split(',')[1];
+                }
+                reader.onerror = function() {
+                    showMessage("Error reading file.", "error");
+                    resetFileSelection();
+                }
+                reader.readAsDataURL(currentFile);
+            } else {
+                resetFileSelection();
+            }
+        }
+
+        function resetFileSelection() {
+            fileNameDisplay.textContent = 'No file selected (JPEG, PNG, WEBP)';
+            verifyButton.disabled = true;
+            documentUpload.value = '';
+            currentFile = null;
+            imageBase64 = null;
+            previewImage.classList.add('hidden');
+            previewImage.src = "#";
+            previewPlaceholder.textContent = "Preview not available";
+            previewPlaceholder.classList.remove('hidden');
+        }
+
+        async function processDocumentWithAI() {
+            if (!currentFile || !imageBase64) {
+                showMessage("Please select an image document first.", "error");
+                return;
+            }
+
+            uploadSection.classList.add('hidden');
+            processingSection.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+            processingStatusText.textContent = "Extracting text from document...";
+            overallStatus.textContent = 'Processing...';
+            overallStatus.className = 'status-badge status-processing';
+
+
+            try {
+                // Step 1: Extract Text using Gemini
+                const textExtractionPrompt = "Extract all visible text from this document image. If possible, try to identify key fields and their values.";
+                const textExtractionPayload = {
+                    contents: [{
+                        parts: [
+                            { text: textExtractionPrompt },
+                            { inlineData: { mimeType: currentFile.type, data: imageBase64 } }
+                        ]
+                    }]
+                };
+
+                const textResponse = await fetch(GEMINI_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(textExtractionPayload)
+                });
+
+                if (!textResponse.ok) {
+                    const errorData = await textResponse.json();
+                    console.error("Gemini Text Extraction API Error:", errorData);
+                    throw new Error(`Text extraction failed: ${errorData.error?.message || textResponse.statusText}`);
+                }
+
+                const textResult = await textResponse.json();
+                const extractedText = textResult.candidates?.[0]?.content?.parts?.[0]?.text || "No text extracted or error in extraction.";
+                
+                processingStatusText.textContent = "Analyzing document authenticity and structure...";
+
+                // Step 2: Analyze Document using Gemini (with extracted text)
+                // We ask Gemini to respond in a JSON format for easier parsing.
+                const analysisPrompt = `
+                    You are an AI document verification assistant. Analyze the provided document image and its extracted text.
+                    Respond in a valid JSON format with the following structure:
+                    {
+                      "documentType": "string (e.g., ID Card, Invoice, Certificate, Unknown)",
+                      "overallAssessment": "string (e.g., Appears Genuine, Minor Concerns, Potential Tampering Detected, High Risk)",
+                      "extractedFields": [ {"field": "string", "value": "string", "confidence": "string (High/Medium/Low)"} ],
+                      "authenticityChecks": [ {"check": "string (e.g., Layout Consistency, Font Analysis, Signature Plausibility, Seal/Stamp Appearance, Image Alteration Signs)", "observation": "string", "status": "string (OK/Warning/Critical)"} ],
+                      "potentialInconsistencies": [ "string" ]
+                    }
+                    Extracted text for your reference: "${extractedText.replace(/"/g, '\\"')}"
+                    Base your analysis on visual cues in the image and the provided text.
+                `;
+
+                const analysisPayload = {
+                    contents: [{
+                        parts: [
+                            { text: analysisPrompt },
+                            { inlineData: { mimeType: currentFile.type, data: imageBase64 } }
+                        ]
+                    }],
+                    generationConfig: {
+                        // Ensure Gemini tries to output JSON
+                        responseMimeType: "application/json",
+                    }
+                };
+                
+                const analysisResponse = await fetch(GEMINI_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(analysisPayload)
+                });
+
+                if (!analysisResponse.ok) {
+                    const errorData = await analysisResponse.json();
+                    console.error("Gemini Analysis API Error:", errorData);
+                    throw new Error(`Document analysis failed: ${errorData.error?.message || analysisResponse.statusText}`);
+                }
+                
+                const analysisResult = await analysisResponse.json();
+                // The response from Gemini with responseMimeType: "application/json" should be directly parsable if it adheres to the schema.
+                // The actual text content is in analysisResult.candidates[0].content.parts[0].text
+                let aiData;
+                try {
+                    const rawJsonText = analysisResult.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!rawJsonText) {
+                        throw new Error("No analysis content from AI.");
+                    }
+                    aiData = JSON.parse(rawJsonText);
+                } catch (parseError) {
+                    console.error("Error parsing AI JSON response:", parseError);
+                    console.error("Raw AI response text:", analysisResult.candidates?.[0]?.content?.parts?.[0]?.text);
+                    showMessage("AI response was not in the expected JSON format. Displaying raw text.", "error");
+                    // Fallback to displaying raw text if JSON parsing fails
+                    aiData = {
+                        documentType: "Error parsing AI response",
+                        overallAssessment: "Error",
+                        extractedFields: [{ field: "Raw AI Output", value: analysisResult.candidates?.[0]?.content?.parts?.[0]?.text || "No content", confidence: "N/A" }],
+                        authenticityChecks: [],
+                        potentialInconsistencies: ["Could not parse structured data from AI."]
+                    };
+                }
+
+
+                displayAIResults(aiData);
+
+            } catch (error) {
+                console.error("Error during AI processing:", error);
+                showMessage(`An error occurred: ${error.message}`, "error");
+                // Display a minimal error state in results
+                 displayAIResults({
+                    documentType: "Error",
+                    overallAssessment: "Processing Failed",
+                    extractedFields: [],
+                    authenticityChecks: [{ check: "System Error", observation: error.message, status: "Critical" }],
+                    potentialInconsistencies: ["Could not complete AI analysis."]
+                });
+            } finally {
+                processingSection.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+            }
+        }
+
+        function displayAIResults(aiData) {
+            // Clear previous results
+            extractedDataList.innerHTML = '';
+            authenticityChecksList.innerHTML = '';
+            inconsistencyReportList.innerHTML = '';
+            inconsistencyReportContainer.classList.add('hidden');
+
+            docType.textContent = aiData.documentType || 'Unknown';
+
+            // Determine overall status badge based on AI assessment
+            const assessment = (aiData.overallAssessment || "Unknown").toLowerCase();
+            if (assessment.includes("genuine") || assessment.includes("ok")) {
+                overallStatus.textContent = 'Appears Genuine';
+                overallStatus.className = 'status-badge status-verified';
+            } else if (assessment.includes("concern") || assessment.includes("warning") || assessment.includes("minor")) {
+                overallStatus.textContent = 'Minor Concerns';
+                overallStatus.className = 'status-badge status-warning';
+            } else if (assessment.includes("tampering") || assessment.includes("risk") || assessment.includes("rejected") || assessment.includes("critical") || assessment.includes("failed")) {
+                overallStatus.textContent = 'High Risk / Rejected';
+                overallStatus.className = 'status-badge status-rejected';
+            } else {
+                overallStatus.textContent = 'Needs Review';
+                overallStatus.className = 'status-badge status-warning';
+            }
+
+
+            // Populate Extracted Fields
+            (aiData.extractedFields || []).forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${item.field || 'N/A'}:</strong> ${item.value || 'N/A'} <span class="text-xs text-gray-500">(${item.confidence || 'N/A'})</span>`;
+                extractedDataList.appendChild(li);
+            });
+            if (!aiData.extractedFields || aiData.extractedFields.length === 0) {
+                extractedDataList.innerHTML = '<li>No specific fields extracted by AI.</li>';
+            }
+
+
+            // Populate Authenticity Checks
+            (aiData.authenticityChecks || []).forEach(item => {
+                const li = document.createElement('li');
+                let statusColor = 'text-gray-600';
+                const itemStatus = (item.status || "").toLowerCase();
+                if (itemStatus === 'ok') statusColor = 'text-green-600';
+                else if (itemStatus === 'warning') statusColor = 'text-yellow-600';
+                else if (itemStatus === 'critical') statusColor = 'text-red-600';
+                li.innerHTML = `<strong>${item.check || 'N/A'}:</strong> <span class="${statusColor}">${item.observation || 'N/A'}</span>`;
+                authenticityChecksList.appendChild(li);
+            });
+             if (!aiData.authenticityChecks || aiData.authenticityChecks.length === 0) {
+                authenticityChecksList.innerHTML = '<li>No specific authenticity checks performed or reported by AI.</li>';
+            }
+
+            // Populate Inconsistency Report
+            if (aiData.potentialInconsistencies && aiData.potentialInconsistencies.length > 0) {
+                inconsistencyReportContainer.classList.remove('hidden');
+                aiData.potentialInconsistencies.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    inconsistencyReportList.appendChild(li);
+                });
+            }
+        }
+
+        function resetSystem() {
+            uploadSection.classList.remove('hidden');
+            processingSection.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+            resetFileSelection();
+        }
+
+        function showMessage(text, type = "info") {
+            messageText.textContent = text;
+            messageBox.classList.remove('hidden', 'bg-red-500', 'bg-green-500', 'bg-blue-500');
+            if (type === "error") {
+                messageBox.classList.add('bg-red-500');
+            } else if (type === "success") {
+                messageBox.classList.add('bg-green-500');
+            } else {
+                messageBox.classList.add('bg-blue-500');
+            }
+            messageBox.style.opacity = "1";
+
+            setTimeout(() => {
+                messageBox.style.opacity = "0";
+                setTimeout(() => messageBox.classList.add('hidden'), 300);
+            }, 4000); // Increased duration for messages
+        }
+    </script>
+</body>
+</html>
