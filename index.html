@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,63 +10,105 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Tailwind gray-100 */
+            background-color: #f3f4f6;
+            /* Tailwind gray-100 */
         }
+
         .container {
             max-width: 900px;
             margin: 2rem auto;
             padding: 1.5rem;
         }
+
         .upload-area {
-            border: 2px dashed #cbd5e1; /* Tailwind gray-300 */
+            border: 2px dashed #cbd5e1;
+            /* Tailwind gray-300 */
             padding: 2rem;
             text-align: center;
             border-radius: 0.5rem;
             background-color: #ffffff;
             transition: background-color 0.3s ease;
         }
+
         .upload-area:hover {
-            background-color: #f9fafb; /* Tailwind gray-50 */
+            background-color: #f9fafb;
+            /* Tailwind gray-50 */
         }
+
         .file-input-label {
             cursor: pointer;
             padding: 0.75rem 1.5rem;
-            background-color: #3b82f6; /* Tailwind blue-500 */
+            background-color: #3b82f6;
+            /* Tailwind blue-500 */
             color: white;
             border-radius: 0.375rem;
             transition: background-color 0.3s ease;
         }
+
         .file-input-label:hover {
-            background-color: #2563eb; /* Tailwind blue-600 */
+            background-color: #2563eb;
+            /* Tailwind blue-600 */
         }
+
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            border-left-color: #3b82f6; /* Tailwind blue-500 */
+            border-left-color: #3b82f6;
+            /* Tailwind blue-500 */
             animation: spin 1s ease infinite;
         }
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
+
         .status-badge {
             padding: 0.25rem 0.75rem;
-            border-radius: 9999px; /* pill shape */
+            border-radius: 9999px;
+            /* pill shape */
             font-weight: 500;
             font-size: 0.875rem;
         }
-        .status-verified { background-color: #d1fae5; color: #065f46; /* Tailwind green-100, green-700 */ }
-        .status-warning { background-color: #fef3c7; color: #92400e; /* Tailwind yellow-100, yellow-700 */ }
-        .status-rejected { background-color: #fee2e2; color: #991b1b; /* Tailwind red-100, red-700 */ }
-        .status-processing { background-color: #e0e7ff; color: #3730a3; /* Tailwind indigo-100, indigo-700 */}
+
+        .status-verified {
+            background-color: #d1fae5;
+            color: #065f46;
+            /* Tailwind green-100, green-700 */
+        }
+
+        .status-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+            /* Tailwind yellow-100, yellow-700 */
+        }
+
+        .status-rejected {
+            background-color: #fee2e2;
+            color: #991b1b;
+            /* Tailwind red-100, red-700 */
+        }
+
+        .status-processing {
+            background-color: #e0e7ff;
+            color: #3730a3;
+            /* Tailwind indigo-100, indigo-700 */
+        }
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .results-grid {
-                grid-template-columns: 1fr; /* Stack columns on smaller screens */
+                grid-template-columns: 1fr;
+                /* Stack columns on smaller screens */
             }
+
             .container {
                 margin: 1rem;
                 padding: 1rem;
@@ -74,6 +116,7 @@
         }
     </style>
 </head>
+
 <body class="antialiased">
     <div class="container bg-white shadow-xl rounded-lg p-6 md:p-8">
         <header class="text-center mb-8">
@@ -83,15 +126,21 @@
 
         <section id="uploadSection" class="mb-8">
             <div class="upload-area">
-                <input type="file" id="documentUpload" class="hidden" accept="image/jpeg,image/png,image/webp"> <label for="documentUpload" class="file-input-label inline-block mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                <input type="file" id="documentUpload" class="hidden" accept="image/jpeg,image/png,image/webp"> <label
+                    for="documentUpload" class="file-input-label inline-block mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+                            clip-rule="evenodd" />
                     </svg>
                     Choose Image Document
                 </label>
                 <p id="fileName" class="text-gray-500 text-sm">No file selected (JPEG, PNG, WEBP)</p>
             </div>
-            <button id="verifyButton" class="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out disabled:opacity-50" disabled>
+            <button id="verifyButton"
+                class="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out disabled:opacity-50"
+                disabled>
                 Verify Document
             </button>
         </section>
@@ -107,8 +156,10 @@
             <div class="results-grid grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-gray-50 p-4 rounded-lg shadow">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">Document Preview</h3>
-                    <div id="documentPreview" class="w-full h-64 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
-                        <img id="previewImage" src="#" alt="Document Preview" class="hidden max-w-full max-h-full object-contain">
+                    <div id="documentPreview"
+                        class="w-full h-64 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
+                        <img id="previewImage" src="#" alt="Document Preview"
+                            class="hidden max-w-full max-h-full object-contain">
                         <p id="previewPlaceholder" class="text-gray-500">Preview not available</p>
                     </div>
                 </div>
@@ -118,38 +169,44 @@
                         <h3 class="text-lg font-semibold text-gray-700">Details</h3>
                         <span id="overallStatus" class="status-badge"></span>
                     </div>
-                    <p class="text-sm text-gray-600 mb-3"><strong>Document Type:</strong> <span id="docType">N/A</span></p>
+                    <p class="text-sm text-gray-600 mb-3"><strong>Document Type:</strong> <span id="docType">N/A</span>
+                    </p>
 
                     <div class="mb-4">
                         <h4 class="font-medium text-gray-700 mb-2">Extracted Information (AI Generated):</h4>
                         <ul id="extractedData" class="list-disc list-inside text-sm text-gray-600 space-y-1 pl-2">
-                            </ul>
+                        </ul>
                     </div>
 
                     <div class="mb-4">
                         <h4 class="font-medium text-gray-700 mb-2">Authenticity Analysis (AI Generated):</h4>
                         <ul id="authenticityChecks" class="list-disc list-inside text-sm text-gray-600 space-y-1 pl-2">
-                            </ul>
+                        </ul>
                     </div>
 
                     <div id="inconsistencyReportContainer" class="hidden">
                         <h4 class="font-medium text-red-600 mb-2">Potential Inconsistencies (AI Generated):</h4>
                         <ul id="inconsistencyReport" class="list-disc list-inside text-sm text-red-500 space-y-1 pl-2">
-                            </ul>
+                        </ul>
                     </div>
                 </div>
             </div>
-            <button id="verifyAnotherButton" class="mt-8 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out">
+            <button id="verifyAnotherButton"
+                class="mt-8 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out">
                 Verify Another Document
             </button>
         </section>
 
-        <div id="messageBox" class="hidden fixed bottom-5 right-5 bg-red-500 text-white p-4 rounded-lg shadow-lg transition-opacity duration-300 z-50">
+        <div id="messageBox"
+            class="hidden fixed bottom-5 right-5 bg-red-500 text-white p-4 rounded-lg shadow-lg transition-opacity duration-300 z-50">
             <p id="messageText"></p>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { GEMINI_API_KEY } from './config.js';
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
         // DOM Elements
         const uploadSection = document.getElementById('uploadSection');
         const processingSection = document.getElementById('processingSection');
@@ -174,9 +231,7 @@
         let currentFile = null;
         let imageBase64 = null;
 
-        // IMPORTANT: REPLACE WITH YOUR ACTUAL API KEY OR LEAVE EMPTY IF PROVIDED BY CANVAS ENVIRONMENT
-        const GEMINI_API_KEY = "AIzaSyBj-fPGKztBctUTPEpOc8bHEH2hbCTxosM"; // If Canvas provides it, this can be left empty.
-        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
 
         // Event Listeners
         documentUpload.addEventListener('change', handleFileSelect);
@@ -198,14 +253,14 @@
                 verifyButton.disabled = false;
 
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     previewImage.src = e.target.result;
                     previewImage.classList.remove('hidden');
                     previewPlaceholder.classList.add('hidden');
                     // Store base64 data, removing the prefix
                     imageBase64 = e.target.result.split(',')[1];
                 }
-                reader.onerror = function() {
+                reader.onerror = function () {
                     showMessage("Error reading file.", "error");
                     resetFileSelection();
                 }
@@ -267,7 +322,7 @@
 
                 const textResult = await textResponse.json();
                 const extractedText = textResult.candidates?.[0]?.content?.parts?.[0]?.text || "No text extracted or error in extraction.";
-                
+
                 processingStatusText.textContent = "Analyzing document authenticity and structure...";
 
                 // Step 2: Analyze Document using Gemini (with extracted text)
@@ -298,7 +353,7 @@
                         responseMimeType: "application/json",
                     }
                 };
-                
+
                 const analysisResponse = await fetch(GEMINI_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -310,7 +365,7 @@
                     console.error("Gemini Analysis API Error:", errorData);
                     throw new Error(`Document analysis failed: ${errorData.error?.message || analysisResponse.statusText}`);
                 }
-                
+
                 const analysisResult = await analysisResponse.json();
                 // The response from Gemini with responseMimeType: "application/json" should be directly parsable if it adheres to the schema.
                 // The actual text content is in analysisResult.candidates[0].content.parts[0].text
@@ -342,7 +397,7 @@
                 console.error("Error during AI processing:", error);
                 showMessage(`An error occurred: ${error.message}`, "error");
                 // Display a minimal error state in results
-                 displayAIResults({
+                displayAIResults({
                     documentType: "Error",
                     overallAssessment: "Processing Failed",
                     extractedFields: [],
@@ -403,7 +458,7 @@
                 li.innerHTML = `<strong>${item.check || 'N/A'}:</strong> <span class="${statusColor}">${item.observation || 'N/A'}</span>`;
                 authenticityChecksList.appendChild(li);
             });
-             if (!aiData.authenticityChecks || aiData.authenticityChecks.length === 0) {
+            if (!aiData.authenticityChecks || aiData.authenticityChecks.length === 0) {
                 authenticityChecksList.innerHTML = '<li>No specific authenticity checks performed or reported by AI.</li>';
             }
 
@@ -444,4 +499,5 @@
         }
     </script>
 </body>
+
 </html>
